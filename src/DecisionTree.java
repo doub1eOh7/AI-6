@@ -159,5 +159,38 @@ public class DecisionTree extends SupervisedLearner {
 		Vec.copy(out, leafnode.label);		
 	}	
 	
+	void printNode(vector lt; char gt; amp; prefix, string parentValue) {
+		if(isInteriorNode()) {
+			for(int n = 0; n + 1 &lt; prefix.size(); n++)
+				print(prefix[n]);
+			print("|\n");
+			for(int n = 0; n + 1 &lt; prefix.size(); n++)
+				print(prefix[n]);
+			print("+" + parentValue + ".Is " +
+				attributeName + " == " +
+				valueName + "?\n");
+			prefix.push_back(' ');
+			prefix.push_back(' ');
+			prefix.push_back(' ');
+			prefix.push_back('|');
+			m_left_child.printNode(prefix, "Yes");
+			prefix.pop_back();
+			prefix.push_back(' ');
+			m_right_child.printNode(prefix, "No");
+			prefix.pop_back();
+			prefix.pop_back();
+			prefix.pop_back();
+			prefix.pop_back();
+		} else {
+			for(int n = 0; n + 1 &lt; prefix.size(); n++)
+				print(prefix[n]);
+			print("|\n");
+			for(int n = 0; n + 1 &lt; prefix.size(); n++)
+				print(prefix[n]);
+			print("+" + parentValue + ".'class'=" +
+						labelVector + "\n");
+		}
+	}
+	
 	
 }
