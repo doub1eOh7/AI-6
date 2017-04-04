@@ -47,7 +47,7 @@ public class DecisionTree extends SupervisedLearner {
 	
 	Node buildTree(Matrix features, Matrix labels)
 	{
-		int seed = 1;
+		int seed = 30000;
 		Random rand = new Random(seed);
 		int splitcol = rand.nextInt(features.cols());
 		int randrow = rand.nextInt(features.rows());
@@ -57,20 +57,19 @@ public class DecisionTree extends SupervisedLearner {
 		Matrix al = new Matrix();
 		Matrix bl = new Matrix();
 
-		if(features.valueCount(splitcol) == 0)
+		for(int attempts = 0; attempts < 30; attempts++)
 		{
-			for(int attempts = 0; attempts < 10; attempts++)
+			splitcol = rand.nextInt(features.cols());
+			randrow = rand.nextInt(features.rows());
+			splitval = features.row(randrow)[splitcol];
+			af.copyMetaData(features);
+			bf.copyMetaData(features);
+			al.copyMetaData(labels);
+			bl.copyMetaData(labels);
+			
+			for(int i = 0; i < features.rows(); i++)
 			{
-				splitcol = rand.nextInt(features.cols());
-				randrow = rand.nextInt(features.rows());
-				splitval = features.row(randrow)[splitcol];
-
-				af.copyMetaData(features);
-				bf.copyMetaData(features);
-				al.copyMetaData(labels);
-				bl.copyMetaData(labels);
-				
-				for(int i = 0; i < features.rows(); i++)
+				if(features.valueCount(splitcol) == 0)
 				{
 					if(features.row(i)[splitcol] < splitval)
 					{
@@ -83,51 +82,7 @@ public class DecisionTree extends SupervisedLearner {
 						Vec.copy(bl.newRow(), labels.row(i));
 					}
 				}
-				if(af.rows() > 0 && bf.rows() > 0)
-					break;
-			}
-			
-			if(af.rows() < 1)
-			{
-				LeafNode l = new LeafNode(bf, bl);
-				l.label = bl.row(0);
-				//System.out.println(l.toString());
-				return l;
-			}
-			if(bf.rows() < 1)
-			{
-				LeafNode l = new LeafNode(af, al);
-				l.label = al.row(0);
-				//System.out.println(l.toString());
-				return l;
-			}
-			
-			InteriorNode n = new InteriorNode();
-			n.splitval = splitval;
-			n.splitcol = splitcol;
-			n.a = buildTree(af, al);
-			n.b = buildTree(bf, bl);
-			n.x = af;
-			n.y = bf;
-			
-			//System.out.println(n.toString());
-			return n;
-		}
-		
-		else
-		{
-			for(int attempts = 0; attempts < 10; attempts++)
-			{
-				splitcol = rand.nextInt(features.cols());
-				randrow = rand.nextInt(features.rows());
-				splitval = features.row(randrow)[splitcol];
-
-				af.copyMetaData(features);
-				bf.copyMetaData(features);
-				al.copyMetaData(labels);
-				bl.copyMetaData(labels);
-			
-				for(int i = 0; i < features.rows(); i++)
+				else
 				{
 					if(features.row(i)[splitcol] == splitval)
 					{
@@ -140,37 +95,36 @@ public class DecisionTree extends SupervisedLearner {
 						Vec.copy(bl.newRow(), labels.row(i));
 					}
 				}
-			
-				if(af.rows() > 0 && bf.rows() > 0)
-					break;
 			}
-				
-				
-			if(af.rows() < 1)
-			{
-				LeafNode l = new LeafNode(bf, bl);
-				l.label = bl.row(0);
-				//System.out.println(l.toString());
-				return l;
-			}
-			if(bf.rows() < 1)
-			{
-				LeafNode l = new LeafNode(af, al);
-				l.label = al.row(0);
-				//System.out.println(l.toString());
-				return l;
-			}
-			
-			InteriorNode n = new InteriorNode();
-			n.splitval = splitval;
-			n.splitcol = splitcol;
-			n.a = buildTree(af, al);
-			n.b = buildTree(bf, bl);
-			n.x = af;
-			n.y = bf;
-			//System.out.println(n.toString());
-			return n;
+			if(af.rows() > 0 && bf.rows() > 0)
+				break;
+		}		
+		if(af.rows() < 1)
+		{
+			LeafNode l = new LeafNode(bf, bl);
+			l.label = bl.row(0);
+			//System.out.println(l.toString());
+			return l;
 		}
+		if(bf.rows() < 1)
+		{
+			LeafNode l = new LeafNode(af, al);
+			l.label = al.row(0);
+			//System.out.println(l.toString());
+			return l;
+		}
+		
+		InteriorNode n = new InteriorNode();
+		n.splitval = splitval;
+		n.splitcol = splitcol;
+		n.x = af;
+		n.y = bf;
+		n.a = buildTree(af, al);
+		n.b = buildTree(bf, bl);
+
+		
+		//System.out.println(n.toString());
+		return n;
 	}
 	
 	void train(Matrix features, Matrix labels)
@@ -200,8 +154,9 @@ public class DecisionTree extends SupervisedLearner {
 		}
 		
 		LeafNode leafnode = (LeafNode)n;
-		Vec.copy(out, leafnode.label);
-		
+		//System.out.println(out.length);
+		//System.out.println(leafnode.label.length);
+		Vec.copy(out, leafnode.label);		
 	}	
 	
 	
